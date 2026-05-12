@@ -14,7 +14,7 @@ timedatectl set-ntp true
 
 # To avoid dead keys errors at install time
 pacman -Sy
-pacman -S archlinux-keyring
+pacman -S archlinux-keyring --noconfirm --needed
 
 clear
 
@@ -120,7 +120,7 @@ do
     mount $root /mnt
     fatal_error $? "mounting the partition"
 
-    if [ ! -d "/mnt/boot"]
+    if [ ! -d "/mnt/boot" ]
     then
         mkdir /mnt/boot
         fatal_error $? "creating the /mnt/boot folder"
