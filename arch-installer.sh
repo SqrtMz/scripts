@@ -51,9 +51,11 @@ then
     echo -e "Grub will be used as bootloader"
     bootmode="BIOS"
     bootloader="grub"
+    bootloader_extra=""
 else
     echo -e "An EFI system detected, UEFI bootloader installation will be used \n"
     bootmode="EFI"
+    bootloader_extra="efibootmgr"
 
     while true
     do
@@ -67,13 +69,11 @@ else
             1 ) echo
                 echo -e "Grub will be installed as bootloader \n"
                 bootloader="grub"
-                bootloader_extra=""
                 break;;
 
             2 ) echo
                 echo -e "Refind will be installed as bootloader \n"
                 bootloader="refind"
-                bootloader_extra="efibootmgr"
                 break;;
 
             * ) echo
@@ -289,6 +289,7 @@ echo "root:$root_password" | arch-chroot /mnt chpasswd
 echo "$user:$user_password" | arch-chroot /mnt chpasswd
 
 umount -R /mnt
+swapoff $swap
 fatal_error $? "unmounting the partitions"
 
 echo
