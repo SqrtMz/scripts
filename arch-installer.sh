@@ -138,7 +138,7 @@ do
                 mkfs.fat -F32 $efi
                 fatal_error $? "formatting the partition"
 
-                fatlabel $efi EFI
+                fatlabel $efi BOOT
                 fatal_error $? "assigning a label to the EFI partition"
                 break;;
 
@@ -219,7 +219,7 @@ fatal_error $? "trying to download and install the system. Please check your int
 
 genfstab -U /mnt >> /mnt/etc/fstab
 
-arch-chroot /mnt /bin/bash -e <<EOF
+arch-chroot /mnt /bin/bash -e << EOF
 
     echo -e "Entered to chroot \n"
 
@@ -263,25 +263,25 @@ arch-chroot /mnt /bin/bash -e <<EOF
     # Enable Services
     systemctl enable NetworkManager
     systemctl enable bluetooth
-
-    if (( $bootloader == "grub" ))
-    then
-        if (( $bootmode == "BIOS" ))
-        then
-            grub-install --recheck /dev/$(lsblk -ndo pkname $root)
-        else
-            grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
-        fi
-
-        sed -i "s|^GRUB_CMDLINE_LINUX_DEFAULT=\"loglevel=3 quiet\"|GRUB_CMDLINE_LINUX_DEFAULT=\"loglevel=3\"|" /etc/default/grub
-        grub-mkconfig -o /boot/grub/grub.cfg
-
-    else
-        refind-install --usedefault "$efi" --alldrivers
-        mkrlconf
-        echo "\"Boot with minimal options\" \"ro root=UUID=$(blkid -s UUID -o value $root)\"" > /boot/refind_linux.conf
-    fi
 EOF
+
+if (( $bootloader == "grub" ))
+then
+    if (( $bootmode == "BIOS" ))
+    then
+        arch-chroot /mnt grub-install --recheck /dev/$(lsblk -ndo pkname $root)
+    else
+        arch-chroot /mnt grub-install lsbl--target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
+    fi
+
+    arch-chroot /mnt sed -i "s|^GRUB_CMDLINE_LINUX_DEFAULT=\"loglevel=3 quiet\"|GRUB_CMDLINE_LINUX_DEFAULT=\"loglevel=3\"|" /etc/default/grub
+    arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
+
+else
+    arch-chroot /mnt refind-install --usedefault "$efi" --alldrivers
+    arch-chroot /mnt mkrlconf
+    arch-chroot /mnt echo "\"Boot with minimal options\" \"ro root=UUID=$(blkid -s UUID -o value $root)\"" > /boot/refind_linux.conf
+fi
 
 echo "root:$root_password" | arch-chroot /mnt chpasswd
 echo "$user:$user_password" | arch-chroot /mnt chpasswd
