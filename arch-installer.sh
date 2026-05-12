@@ -101,26 +101,22 @@ do
     case $rootf in
         [Yy] )  echo
                 echo -e "The partition will be formatted and mounted \n"
-                format_root=1;;
+                mkfs.ext4 $root -L ROOT
+                fatal_error $? "formatting the partition"
+                break;;
 
         [Nn] )  echo
-                echo -e "The partition will only be mounted \n";;
+                echo -e "The partition will only be mounted \n"
+                break;;
 
         * )     echo
                 echo -e "Invalid option, try again \n"
                 continue;;
     esac
-
-    if [[ $format_root == 1 ]]
-    then
-        mkfs.ext4 $root -L ROOT
-        fatal_error $? "formatting the partition"
-    fi
-
-    mount $root /mnt
-    fatal_error $? "mounting the partition"
-    break
 done
+
+mount $root /mnt
+fatal_error $? "mounting the partition"
 
 while true
 do
@@ -154,12 +150,10 @@ do
                 echo -e "Invalid option, try again \n"
                 continue;;
     esac
-
-    mount $efi /mnt/boot -m
-    fatal_error $? "mounting the partition"
-    
-    break
 done
+
+mount $efi /mnt/boot -m
+fatal_error $? "mounting the partition"
 
 while true
 do
@@ -180,10 +174,8 @@ do
 
                 mkswap $swap -L SWAP
                 fatal_error $? "formatting the partition"
-
                 swapon $swap
                 fatal_error $? "mounting the partition"
-
                 break;;
         
         [Nn] )  echo
