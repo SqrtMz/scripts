@@ -1,7 +1,15 @@
 #! /usr/bin/env bash
 
-root="/dev/nvme0n1p3"
-echo "\"Boot with minimal options\" \"ro root=UUID=$(blkid -s UUID -o value $root)\""
+su mz
+
+echo $(whoami)
+
+exit
+
+echo $(whoami)
+
+# root="/dev/nvme0n1p3"
+# echo "\"Boot with minimal options\" \"ro root=UUID=$(blkid -s UUID -o value $root)\""
 
 # ls /sys/firmware/efi/efivars &> /dev/null
 
