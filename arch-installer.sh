@@ -264,12 +264,9 @@ arch-chroot /mnt /bin/bash -e << EOF
     systemctl enable NetworkManager
     systemctl enable bluetooth
 
-EOF
-
-arch-chroot /mnt /bin/bash << 'EOF'
-    if (( $bootloader == "grub" ))
+    if [[ $bootloader == "grub" ]]
     then
-        if (( $bootmode == "BIOS" ))
+        if [[ $bootmode == "BIOS" ]]
         then
             grub-install --recheck /dev/$(lsblk -ndo pkname $root)
         else
