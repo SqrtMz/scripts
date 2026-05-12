@@ -179,7 +179,7 @@ do
                 echo -e "Write path of SWAP: \c"
                 read swap
 
-                if [ -e $swap ]
+                if [ ! -e $swap ]
                     then
                         echo -e "Invalid partition, try again \n"
                         continue
