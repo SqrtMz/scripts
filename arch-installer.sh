@@ -119,13 +119,6 @@ do
 
     mount $root /mnt
     fatal_error $? "mounting the partition"
-
-    if [ ! -d "/mnt/boot" ]
-    then
-        mkdir /mnt/boot
-        fatal_error $? "creating the /mnt/boot folder"
-    fi
-
     break
 done
 
@@ -162,7 +155,7 @@ do
                 continue;;
     esac
 
-    mount $efi /mnt/boot
+    mount $efi /mnt/boot -m
     fatal_error $? "mounting the partition"
     
     break
