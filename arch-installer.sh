@@ -188,10 +188,6 @@ do
     esac
 done
 
-# Pacman Keyring and Pacstrap
-pacman-key --init
-pacman-key --populate archlinux
-
 while true
 do
     echo
@@ -215,10 +211,12 @@ do
     esac
 done
 
+pacman-key --init
+pacman-key --populate archlinux
+
 pacstrap -K /mnt base base-devel linux-firmware $kernel $kernel-headers mkinitcpio fastfetch curl wget git xdg-user-dirs --noconfirm --needed
 fatal_error $? "trying to download and install the system. Please check your internet connection"
 
-# Fstab file generation and chroot
 genfstab -U /mnt >> /mnt/etc/fstab
 
 arch-chroot /mnt /bin/bash -e <<EOF
@@ -252,7 +250,7 @@ arch-chroot /mnt /bin/bash -e <<EOF
     # Pacman Config File
     sed -i "s|^#Color|Color|" /etc/pacman.conf
     sed -i "s|^#VerbosePkgLists|VerbosePkgLists|" /etc/pacman.conf
-    sed -i "s|^#ParallelDownloads = 5|ParallelDownloads = 5\nILoveCandy|" /etc/pacman.conf
+    sed -i "s|^#ParallelDownloads = 5|ParallelDownloads = 5|" /etc/pacman.conf
 
     sed -i "s|^#\\[multilib\\]|\\[multilib\\]|" /etc/pacman.conf
     sed -i "/^\\[multilib\\]/,/#Include = \\/etc\\/pacman.d\\/mirrorlist/ s|#Include = /etc/pacman.d/mirrorlist|Include = /etc/pacman.d/mirrorlist|" /etc/pacman.conf
