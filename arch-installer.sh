@@ -141,29 +141,26 @@ do
     fi
 
     echo -e "Format partition? [y/n]"
-    read efif
+    read format_efi_selection
 
-    case $efif in
+    case $format_efi_selection in
         [Yy] )  echo
                 echo -e "The partition will be formatted and mounted \n"
-                format_efi=1;;
+                mkfs.fat -F32 $efi
+                fatal_error $? "formatting the partition"
+
+                fatlabel $efi EFI
+                fatal_error $? "assigning a label to the EFI partition"
+                break;;
 
         [Nn] )  echo
-                echo -e "The partition will only be mounted \n";;
+                echo -e "The partition will only be mounted \n"
+                break;;
 
         * )     echo
                 echo -e "Invalid option, try again \n"
                 continue;;
     esac
-
-    if [[ $format_efi == 1 ]]
-    then
-        mkfs.fat -F32 $efi
-        fatal_error $? "formatting the partition"
-
-        fatlabel $efi EFI
-        fatal_error $? "assigning a label to the EFI partition"
-    fi
 
     mount $efi /mnt/boot
     fatal_error $? "mounting the partition"
@@ -175,9 +172,9 @@ while true
 do
     echo
     echo "Use SWAP partition? [y/n]"
-    read tSw
+    read use_swap_selection
 
-    case $tSw in
+    case $use_swap_selection in
         [Yy] )  echo
                 echo -e "Write path of SWAP: \c"
                 read swap
