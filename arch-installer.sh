@@ -113,7 +113,7 @@ do
 
     if [[ $format_root == 1 ]]
     then
-        mkfs.ext4 $root
+        mkfs.ext4 $root -L ROOT
         fatal_error $? "formatting the partition"
     fi
 
@@ -161,7 +161,7 @@ do
         mkfs.fat -F32 $efi
         fatal_error $? "formatting the partition"
 
-        fatlabel $efi "EFI"
+        fatlabel $efi EFI
         fatal_error $? "assigning a label to the EFI partition"
     fi
 
@@ -188,10 +188,10 @@ do
                         continue
                 fi
 
-                mkswap $swap
+                mkswap $swap -L SWAP
                 fatal_error $? "formatting the partition"
 
-                swapon $swap -L "SWAP"
+                swapon $swap
                 fatal_error $? "mounting the partition"
 
                 break;;
