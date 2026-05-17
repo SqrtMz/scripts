@@ -277,7 +277,7 @@ arch-chroot /mnt /bin/bash -e << EOF
         grub-mkconfig -o /boot/grub/grub.cfg
 
     else
-        refind-install --usedefault "$efi" --alldrivers
+        refind-install --usedefault $efi --alldrivers
         mkrlconf
         echo "\"Boot with minimal options\" \"ro root=UUID=$(blkid -s UUID -o value $root)\"" > /boot/refind_linux.conf
     fi
