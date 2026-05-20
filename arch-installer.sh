@@ -287,8 +287,12 @@ echo "root:$root_password" | arch-chroot /mnt chpasswd
 echo "$user:$user_password" | arch-chroot /mnt chpasswd
 
 umount -R /mnt
-swapoff $swap
-fatal_error $? "unmounting the partitions"
+
+if [[ $swap != "" ]]
+then
+    swapoff $swap
+    fatal_error $? "unmounting the partitions"
+fi
 
 echo
 echo "Mz's Arch Installer - Process Succeeded"

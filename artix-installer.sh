@@ -14,7 +14,7 @@ timedatectl set-ntp true
 
 # To avoid dead keys errors at install time
 pacman -Sy
-pacman -S archlinux-keyring
+pacman -S archlinux-keyring --noconfirm --needed
 
 clear
 
@@ -51,9 +51,11 @@ then
     echo -e "Grub will be used as bootloader"
     bootmode="BIOS"
     bootloader="grub"
+    bootloader_extra=""
 else
     echo -e "An EFI system detected, UEFI bootloader installation will be used \n"
     bootmode="EFI"
+    bootloader_extra="efibootmgr"
 
     while true
     do
@@ -67,13 +69,11 @@ else
             1 ) echo
                 echo -e "Grub will be installed as bootloader \n"
                 bootloader="grub"
-                bootloader_extra=""
                 break;;
 
             2 ) echo
                 echo -e "Refind will be installed as bootloader \n"
                 bootloader="refind"
-                bootloader_extra="efibootmgr"
                 break;;
 
             * ) echo
@@ -101,33 +101,22 @@ do
     case $rootf in
         [Yy] )  echo
                 echo -e "The partition will be formatted and mounted \n"
-                format_root=1;;
+                mkfs.ext4 $root -L ROOT
+                fatal_error $? "formatting the partition"
+                break;;
 
         [Nn] )  echo
-                echo -e "The partition will only be mounted \n";;
+                echo -e "The partition will only be mounted \n"
+                break;;
 
         * )     echo
                 echo -e "Invalid option, try again \n"
                 continue;;
     esac
-
-    if [[ $format_root == 1 ]]
-    then
-        mkfs.ext4 $root
-        fatal_error $? "formatting the partition"
-    fi
-
-    mount $root /mnt
-    fatal_error $? "mounting the partition"
-
-    if [ ! -d "/mnt/boot"]
-    then
-        mkdir /mnt/boot
-        fatal_error $? "creating the /mnt/boot folder"
-    fi
-
-    break
 done
+
+mount $root /mnt
+fatal_error $? "mounting the partition"
 
 while true
 do
@@ -141,59 +130,52 @@ do
     fi
 
     echo -e "Format partition? [y/n]"
-    read efif
+    read format_efi_selection
 
-    case $efif in
+    case $format_efi_selection in
         [Yy] )  echo
                 echo -e "The partition will be formatted and mounted \n"
-                format_efi=1;;
+                mkfs.fat -F32 $efi
+                fatal_error $? "formatting the partition"
+
+                fatlabel $efi BOOT
+                fatal_error $? "assigning a label to the EFI partition"
+                break;;
 
         [Nn] )  echo
-                echo -e "The partition will only be mounted \n";;
+                echo -e "The partition will only be mounted \n"
+                break;;
 
         * )     echo
                 echo -e "Invalid option, try again \n"
                 continue;;
     esac
-
-    if [[ $format_efi == 1 ]]
-    then
-        mkfs.fat -F32 $efi
-        fatal_error $? "formatting the partition"
-
-        fatlabel $efi "EFI"
-        fatal_error $? "assigning a label to the EFI partition"
-    fi
-
-    mount $efi /mnt/boot
-    fatal_error $? "mounting the partition"
-    
-    break
 done
+
+mount $efi /mnt/boot -m
+fatal_error $? "mounting the partition"
 
 while true
 do
     echo
     echo "Use SWAP partition? [y/n]"
-    read tSw
+    read use_swap_selection
 
-    case $tSw in
+    case $use_swap_selection in
         [Yy] )  echo
                 echo -e "Write path of SWAP: \c"
                 read swap
 
-                if [ -e $swap ]
+                if [ ! -e $swap ]
                     then
                         echo -e "Invalid partition, try again \n"
                         continue
                 fi
 
-                mkswap $swap
+                mkswap $swap -L SWAP
                 fatal_error $? "formatting the partition"
-
-                swapon $swap -L "SWAP"
+                swapon $swap
                 fatal_error $? "mounting the partition"
-
                 break;;
         
         [Nn] )  echo
@@ -205,10 +187,6 @@ do
                 continue;;
     esac
 done
-
-# Pacman Keyring and Pacstrap
-pacman-key --init
-pacman-key --populate archlinux
 
 while true
 do
@@ -233,13 +211,15 @@ do
     esac
 done
 
-pacstrap -K /mnt base base-devel linux-firmware $kernel $kernel-headers mkinitcpio fastfetch curl wget git xdg-user-dirs --noconfirm --needed
+pacman-key --init
+pacman-key --populate archlinux
+
+pacstrap -K /mnt base base-devel linux-firmware $kernel $kernel-headers mkinitcpio fastfetch curl wget git xdg-user-dirs artix-archlinux-support --noconfirm --needed
 fatal_error $? "trying to download and install the system. Please check your internet connection"
 
-# Fstab file generation and chroot
-genfstab -U /mnt >> /mnt/etc/fstab
+fstabgen -U /mnt >> /mnt/etc/fstab
 
-arch-chroot /mnt /bin/bash -e <<EOF
+artix-chroot /mnt /bin/bash -e << EOF
 
     echo -e "Entered to chroot \n"
 
@@ -263,51 +243,65 @@ arch-chroot /mnt /bin/bash -e <<EOF
     useradd -m -g users -G wheel -s /bin/bash $user
 
     xdg-user-dirs-update
-    xdg-user-dirs-update mz
+    sudo -u mz xdg-user-dirs-update
 
     sed -i "s/^root ALL=(ALL:ALL) ALL/root ALL=(ALL:ALL) ALL\n$user ALL=(ALL:ALL) ALL/" /etc/sudoers
 
     # Pacman Config File
     sed -i "s|^#Color|Color|" /etc/pacman.conf
     sed -i "s|^#VerbosePkgLists|VerbosePkgLists|" /etc/pacman.conf
-    sed -i "s|^#ParallelDownloads = 5|ParallelDownloads = 5\nILoveCandy|" /etc/pacman.conf
+    sed -i "s|^#ParallelDownloads = 5|ParallelDownloads = 5|" /etc/pacman.conf
 
     sed -i "s|^#\\[multilib\\]|\\[multilib\\]|" /etc/pacman.conf
     sed -i "/^\\[multilib\\]/,/#Include = \\/etc\\/pacman.d\\/mirrorlist/ s|#Include = /etc/pacman.d/mirrorlist|Include = /etc/pacman.d/mirrorlist|" /etc/pacman.conf
 
+    echo "
+    
+    [extra]
+    Include = /etc/pacman.d/mirrorlist-arch
+
+    [multilib]
+    Include = /etc/pacman.d/mirrorlist-arch
+    " >> /etc/pacman.conf
+
     pacman -Syu --noconfirm --needed
 
     # Install Fundamentals
-    pacman -S neovim networkmanager wireless_tools bluez bluez-utils blueman $bootloader $bootloader_extra os-prober --noconfirm --needed
+    pacman -S neovim networkmanager networkmanager-dinit wireless_tools bluez bluez-dinit bluez-utils blueman $bootloader $bootloader_extra os-prober --noconfirm --needed
 
     # Enable Services
-    systemctl enable NetworkManager
-    systemctl enable bluetooth
+    ln -s /etc/dinit.d/Networkmanager /etc/dinit.d/boot.d/
+    ln -s /etc/dinit.d/bluetooth /etc/dinit.d/boot.d/
 
-    if (( $bootloader == "grub" ))
+    if [[ $bootloader == "grub" ]]
     then
-        if (( $bootmode == "BIOS" ))
+        if [[ $bootmode == "BIOS" ]]
         then
             grub-install --recheck /dev/$(lsblk -ndo pkname $root)
         else
-            grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
+            grub-install lsbl--target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
         fi
 
         sed -i "s|^GRUB_CMDLINE_LINUX_DEFAULT=\"loglevel=3 quiet\"|GRUB_CMDLINE_LINUX_DEFAULT=\"loglevel=3\"|" /etc/default/grub
         grub-mkconfig -o /boot/grub/grub.cfg
 
     else
-        refind-install --usedefault "$efi" --alldrivers
+        refind-install --usedefault $efi --alldrivers
         mkrlconf
         echo "\"Boot with minimal options\" \"ro root=UUID=$(blkid -s UUID -o value $root)\"" > /boot/refind_linux.conf
     fi
 EOF
 
-echo "root:$root_password" | arch-chroot /mnt chpasswd
-echo "$user:$user_password" | arch-chroot /mnt chpasswd
+echo "root:$root_password" | artix-chroot /mnt chpasswd
+echo "$user:$user_password" | artix-chroot /mnt chpasswd
 
 umount -R /mnt
-fatal_error $? "unmounting the partitions"
+
+if [[ $swap != "" ]]
+then
+    swapoff $swap
+    fatal_error $? "unmounting the partitions"
+fi
 
 echo
 echo "Mz's Arch Installer - Process Succeeded"
