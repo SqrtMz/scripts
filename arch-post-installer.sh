@@ -1,6 +1,6 @@
-#! /bin/bash
+#! /usr/bin/env bash
 
-timedatectl set-ntp true
+sudo timedatectl set-ntp true
 
 clear
 
@@ -100,6 +100,7 @@ do
 
         3 ) echo "KDE Plasma Selected"
             desktop="plasma"
+            break;;
 
         * ) echo "Invalid option, try again"
             continue;;
@@ -126,9 +127,8 @@ fi
 
 
 # Installing basics
-sudo pacman -S xorg dolphin kitty firefox ark okular libreoffice-still ntfs-3g gparted btop nvtop cmake gthumb krita steam mangohud goverlay zsh clonezilla ncdu discord kdeconnect sshfs stow obs-studio virtualbox arch-install-scripts poppler-glib pyenv python-virtualenv --noconfirm --needed
+sudo pacman -S xorg dolphin kitty firefox ark okular libreoffice-still ntfs-3g gparted btop nvtop cmake gthumb krita steam mangohud goverlay zsh clonezilla ncdu discord kdeconnect sshfs obs-studio arch-install-scripts --noconfirm --needed
 
-sudo gpasswd -a $USER vboxusers
 sudo systemctl enable sddm
 
 echo

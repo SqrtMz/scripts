@@ -243,7 +243,7 @@ arch-chroot /mnt /bin/bash -e << EOF
     useradd -m -g users -G wheel -s /bin/bash $user
 
     xdg-user-dirs-update
-    sudo -u mz xdg-user-dirs-update
+    sudo -u $user xdg-user-dirs-update
 
     sed -i "s/^root ALL=(ALL:ALL) ALL/root ALL=(ALL:ALL) ALL\n$user ALL=(ALL:ALL) ALL/" /etc/sudoers
 
