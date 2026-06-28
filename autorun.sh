@@ -6,4 +6,5 @@ wl-paste --type text --watch cliphist store &
 wl-paste --type image --watch cliphist store &
 otd-daemon &
 hyprpaper &
-hyprpm reload -n &
+/usr/lib/hyprpolkitagent/hyprpolkitagent &
+/usr/lib/xdg-desktop-portal &
