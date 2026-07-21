@@ -92,14 +92,19 @@ do
     case $dSel in
         1 ) echo "HyprlandWM Selected"
             desktop="hyprland"
+            sudo pacman -S hyprland brightnessctl pavucontrol waybar rofi-wayland cliphist sddm ranger ttf-nerd-fonts-symbols ttf-font-awesome breeze breeze-gtk gnome-keyring wev nwg-look qt6ct grim slurp xdg-desktop-portal-hyprland archlinux-xdg-menu polkit-gnome hyprpaper network-manager-applet kvantum --noconfirm --needed
+            sudo ln -s /etc/xdg/menus/arch-applications.menu /etc/xdg/menus/applications.menu
             break;;
         
         2 ) echo "SwayWM Selected"
             desktop="sway"
+            sudo pacman -S sway swaybg brightnessctl pavucontrol waybar rofi-wayland cliphist sddm ranger ttf-nerd-fonts-symbols ttf-font-awesome breeze breeze-gtk gnome-keyring wev nwg-look qt6ct grim slurp xdg-desktop-portal xdg-desktop-portal-wlr archlinux-xdg-menu polkit-gnome network-manager-applet kvantum --noconfirm --needed
+            sudo ln -s /etc/xdg/menus/arch-applications.menu /etc/xdg/menus/applications.menu
             break;;
 
         3 ) echo "KDE Plasma Selected"
             desktop="plasma"
+            sudo pacman -S plasma
             break;;
 
         * ) echo "Invalid option, try again"
@@ -107,34 +112,39 @@ do
     esac
 done
 
-if [ desktop == "hyprland" ]
-then
-    sudo pacman -S hyprland brightnessctl pavucontrol waybar rofi-wayland cliphist sddm ranger ttf-nerd-fonts-symbols ttf-font-awesome breeze breeze-gtk gnome-keyring wev nwg-look qt6ct grim slurp xdg-desktop-portal-hyprland archlinux-xdg-menu polkit-gnome hyprpaper network-manager-applet kvantum --noconfirm --needed
-    sudo ln -s /etc/xdg/menus/arch-applications.menu /etc/xdg/menus/applications.menu
-
-elif [ desktop == "sway" ]
-then
-
-    sudo pacman -S sway swaybg brightnessctl pavucontrol waybar rofi-wayland cliphist sddm ranger ttf-nerd-fonts-symbols ttf-font-awesome breeze breeze-gtk gnome-keyring wev nwg-look qt6ct grim slurp xdg-desktop-portal xdg-desktop-portal-wlr archlinux-xdg-menu polkit-gnome network-manager-applet kvantum --noconfirm --needed
-    sudo ln -s /etc/xdg/menus/arch-applications.menu /etc/xdg/menus/applications.menu
-    
-elif [ desktop == "plasma" ]
-then
-
-    sudo pacman -S plasma
-
-fi
-
 sudo pacman -S xorg dolphin kitty firefox ark okular libreoffice-still ntfs-3g gparted btop nvtop cmake gthumb krita steam mangohud goverlay zsh clonezilla ncdu discord kdeconnect sshfs obs-studio arch-install-scripts --noconfirm --needed
 
 sudo systemctl enable sddm
 
-curl --proto '=https' --tlsv1.2 -L https://nixos.org/nix/install | sh -s -- --daemon
+while true
+do
+    echo
+    echo "Install Nix and Home manager? [y/n] \n"
+    read tNix
 
-nix-channel --add https://github.com/nix-community/home-manager/archive/master.tar.gz home-manager
-nix-channel --update
+    echo
 
-nix-shell '<home-manager>' -A install
+    case $tNix in
+        [Yy]* ) echo "Installing... \n"
+                curl --proto '=https' --tlsv1.2 -L https://nixos.org/nix/install | sh -s -- --daemon
+                /nix/var/nix/profiles/default/bin/nix-channel --add https://github.com/nix-community/home-manager/archive/master.tar.gz home-manager
+                /nix/var/nix/profiles/default/bin/nix-channel --update
+                /nix/var/nix/profiles/default/bin/nix-shell '<home-manager>' -A install
+                break;;
+        
+        [Nn]* ) echo "Nix and Home manager won't be installed \n"
+                break;;
+
+        * ) echo "Invalid option, try again"
+            continue;;
+    esac
+done
+
+git clone https://aur.archlinux.org/paru.git
+cd paru
+makepkg -si
+cd ..
+rm -rf paru
 
 echo
 echo "Process Complete"
