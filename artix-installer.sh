@@ -161,7 +161,7 @@ do
 
         parted $efi name N "BOOT"
         fatal_error $? "assignning a label to the BOOT partition"
-        break;;
+        break
     fi
 done
 
