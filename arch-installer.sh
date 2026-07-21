@@ -129,39 +129,40 @@ do
             continue
     fi
 
-    echo -e "Format partition? [y/n]"
-    read format_efi_selection
+    if [[ bootmode == "EFI" ]]
+    then
+        echo -e "Format partition? [y/n]"
+        read format_efi_selection
 
-    case $format_efi_selection in
-        [Yy] )  echo
-                echo -e "The partition will be formatted and mounted \n"
+        case $format_efi_selection in
+            [Yy] )  echo
+                    echo -e "The partition will be formatted and mounted \n"
 
-                if [[ bootmode == "EFI" ]]
-                then
                     mkfs.fat -F32 $efi
                     fatal_error $? "formatting the partition"
 
                     fatlabel $efi BOOT
                     fatal_error $? "assigning a label to the EFI partition"
-                
-                elif [[ bootmode == "BIOS" ]]
-                then
-                    wipefs -a $efi
-                    fatal_error $? "formatting the partition"
+                    break;;
 
-                    parted $efi name N "BOOT"
-                    fatal_error $? "assignning a label to the BOOT partition"
-                fi
-                break;;
+            [Nn] )  echo
+                    echo -e "The partition will only be mounted \n"
+                    break;;
 
-        [Nn] )  echo
-                echo -e "The partition will only be mounted \n"
-                break;;
+            * )     echo
+                    echo -e "Invalid option, try again \n"
+                    continue;;
+        esac
 
-        * )     echo
-                echo -e "Invalid option, try again \n"
-                continue;;
-    esac
+    elif [[ bootmode == "BOOT" ]]
+    then
+        wipefs -a $efi
+        fatal_error $? "formatting the partition"
+
+        parted $efi name N "BOOT"
+        fatal_error $? "assignning a label to the BOOT partition"
+        break;;
+    fi
 done
 
 mount $efi /mnt/boot -m

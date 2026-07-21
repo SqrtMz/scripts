@@ -120,7 +120,7 @@ fatal_error $? "mounting the partition"
 
 while true
 do
-    echo -e "Path to EFI partition: \c"
+    echo -e "Path to BOOT partition: \c"
     read efi
 
     if [ ! -e $efi ]
@@ -129,27 +129,40 @@ do
             continue
     fi
 
-    echo -e "Format partition? [y/n]"
-    read format_efi_selection
+    if [[ bootmode == "EFI" ]]
+    then
+        echo -e "Format partition? [y/n]"
+        read format_efi_selection
 
-    case $format_efi_selection in
-        [Yy] )  echo
-                echo -e "The partition will be formatted and mounted \n"
-                mkfs.fat -F32 $efi
-                fatal_error $? "formatting the partition"
+        case $format_efi_selection in
+            [Yy] )  echo
+                    echo -e "The partition will be formatted and mounted \n"
 
-                fatlabel $efi BOOT
-                fatal_error $? "assigning a label to the EFI partition"
-                break;;
+                    mkfs.fat -F32 $efi
+                    fatal_error $? "formatting the partition"
 
-        [Nn] )  echo
-                echo -e "The partition will only be mounted \n"
-                break;;
+                    fatlabel $efi BOOT
+                    fatal_error $? "assigning a label to the EFI partition"
+                    break;;
 
-        * )     echo
-                echo -e "Invalid option, try again \n"
-                continue;;
-    esac
+            [Nn] )  echo
+                    echo -e "The partition will only be mounted \n"
+                    break;;
+
+            * )     echo
+                    echo -e "Invalid option, try again \n"
+                    continue;;
+        esac
+
+    elif [[ bootmode == "BOOT" ]]
+    then
+        wipefs -a $efi
+        fatal_error $? "formatting the partition"
+
+        parted $efi name N "BOOT"
+        fatal_error $? "assignning a label to the BOOT partition"
+        break;;
+    fi
 done
 
 mount $efi /mnt/boot -m
@@ -279,7 +292,7 @@ artix-chroot /mnt /bin/bash -e << EOF
         then
             grub-install --recheck /dev/$(lsblk -ndo pkname $root)
         else
-            grub-install lsbl--target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
+            grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
         fi
 
         sed -i "s|^GRUB_CMDLINE_LINUX_DEFAULT=\"loglevel=3 quiet\"|GRUB_CMDLINE_LINUX_DEFAULT=\"loglevel=3\"|" /etc/default/grub
