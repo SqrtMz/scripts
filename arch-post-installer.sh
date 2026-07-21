@@ -107,29 +107,34 @@ do
     esac
 done
 
-if ((desktop == "hyprland"))
+if [[ desktop == "hyprland" ]]
 then
     sudo pacman -S hyprland brightnessctl pavucontrol waybar rofi-wayland cliphist sddm ranger ttf-nerd-fonts-symbols ttf-font-awesome breeze breeze-gtk gnome-keyring wev nwg-look qt6ct grim slurp xdg-desktop-portal-hyprland archlinux-xdg-menu polkit-gnome hyprpaper network-manager-applet kvantum --noconfirm --needed
     sudo ln -s /etc/xdg/menus/arch-applications.menu /etc/xdg/menus/applications.menu
 
-elif ((desktop == "sway"))
+elif [[ desktop == "sway" ]]
 then
 
     sudo pacman -S sway swaybg brightnessctl pavucontrol waybar rofi-wayland cliphist sddm ranger ttf-nerd-fonts-symbols ttf-font-awesome breeze breeze-gtk gnome-keyring wev nwg-look qt6ct grim slurp xdg-desktop-portal xdg-desktop-portal-wlr archlinux-xdg-menu polkit-gnome network-manager-applet kvantum --noconfirm --needed
     sudo ln -s /etc/xdg/menus/arch-applications.menu /etc/xdg/menus/applications.menu
     
-elif ((desktop == "plasma"))
+elif [[ desktop == "plasma" ]]
 then
 
     sudo pacman -S plasma
 
 fi
 
-
-# Installing basics
 sudo pacman -S xorg dolphin kitty firefox ark okular libreoffice-still ntfs-3g gparted btop nvtop cmake gthumb krita steam mangohud goverlay zsh clonezilla ncdu discord kdeconnect sshfs obs-studio arch-install-scripts --noconfirm --needed
 
 sudo systemctl enable sddm
+
+curl --proto '=https' --tlsv1.2 -L https://nixos.org/nix/install | sh -s -- --daemon
+
+nix-channel --add https://github.com/nix-community/home-manager/archive/master.tar.gz home-manager
+nix-channel --update
+
+nix-shell '<home-manager>' -A install
 
 echo
 echo "Process Complete"
