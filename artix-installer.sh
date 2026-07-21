@@ -129,7 +129,7 @@ do
             continue
     fi
 
-    if [[ bootmode == "EFI" ]]
+    if [ bootmode == "EFI" ]
     then
         echo -e "Format partition? [y/n]"
         read format_efi_selection
@@ -154,7 +154,7 @@ do
                     continue;;
         esac
 
-    elif [[ bootmode == "BIOS" ]]
+    elif [ bootmode == "BIOS" ]
     then
         wipefs -a $efi
         fatal_error $? "formatting the partition"

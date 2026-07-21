@@ -107,18 +107,18 @@ do
     esac
 done
 
-if [[ desktop == "hyprland" ]]
+if [ desktop == "hyprland" ]
 then
     sudo pacman -S hyprland brightnessctl pavucontrol waybar rofi-wayland cliphist sddm ranger ttf-nerd-fonts-symbols ttf-font-awesome breeze breeze-gtk gnome-keyring wev nwg-look qt6ct grim slurp xdg-desktop-portal-hyprland archlinux-xdg-menu polkit-gnome hyprpaper network-manager-applet kvantum --noconfirm --needed
     sudo ln -s /etc/xdg/menus/arch-applications.menu /etc/xdg/menus/applications.menu
 
-elif [[ desktop == "sway" ]]
+elif [ desktop == "sway" ]
 then
 
     sudo pacman -S sway swaybg brightnessctl pavucontrol waybar rofi-wayland cliphist sddm ranger ttf-nerd-fonts-symbols ttf-font-awesome breeze breeze-gtk gnome-keyring wev nwg-look qt6ct grim slurp xdg-desktop-portal xdg-desktop-portal-wlr archlinux-xdg-menu polkit-gnome network-manager-applet kvantum --noconfirm --needed
     sudo ln -s /etc/xdg/menus/arch-applications.menu /etc/xdg/menus/applications.menu
     
-elif [[ desktop == "plasma" ]]
+elif [ desktop == "plasma" ]
 then
 
     sudo pacman -S plasma
