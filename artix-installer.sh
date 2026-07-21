@@ -154,8 +154,7 @@ do
                     continue;;
         esac
 
-    elif [ bootmode == "BIOS" ]
-    then
+    else [ bootmode == "BIOS" ]
         wipefs -a $efi
         fatal_error $? "formatting the partition"
 
