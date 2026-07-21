@@ -142,17 +142,19 @@ do
                     fatal_error $? "formatting the partition"
 
                     fatlabel $efi BOOT
-                    fatal_error $? "assigning a label to the EFI partition"
-                    break;;
+                    fatal_error $? "assigning a label to the EFI partition";;
 
             [Nn] )  echo
-                    echo -e "The partition will only be mounted \n"
-                    break;;
+                    echo -e "The partition will only be mounted \n";;
 
             * )     echo
                     echo -e "Invalid option, try again \n"
                     continue;;
         esac
+
+        mount $efi /mnt/boot -m
+        fatal_error $? "mounting the partition"
+        break
 
     else
         wipefs -a $efi
@@ -160,9 +162,6 @@ do
         break
     fi
 done
-
-mount $efi /mnt/boot -m
-fatal_error $? "mounting the partition"
 
 while true
 do
