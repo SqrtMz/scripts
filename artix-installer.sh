@@ -154,12 +154,10 @@ do
                     continue;;
         esac
 
-    else [ bootmode == "BIOS" ]
+    else
         wipefs -a $efi
         fatal_error $? "formatting the partition"
 
-        parted $efi name N "BOOT"
-        fatal_error $? "assignning a label to the BOOT partition"
         break
     fi
 done
