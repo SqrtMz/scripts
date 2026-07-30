@@ -278,7 +278,7 @@ artix-chroot /mnt /bin/bash -e << EOF
     pacman -S neovim networkmanager networkmanager-dinit wireless_tools bluez bluez-dinit bluez-utils blueman $bootloader $bootloader_extra os-prober --noconfirm --needed
 
     # Enable Services
-    ln -s /etc/dinit.d/Networkmanager /etc/dinit.d/boot.d/
+    ln -s /etc/dinit.d/NetworkManager /etc/dinit.d/boot.d/
     ln -s /etc/dinit.d/bluetooth /etc/dinit.d/boot.d/
 
     if [[ $bootloader == "grub" ]]
