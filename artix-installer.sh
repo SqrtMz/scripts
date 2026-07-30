@@ -222,7 +222,7 @@ done
 pacman-key --init
 pacman-key --populate archlinux
 
-pacstrap -K /mnt base base-devel linux-firmware $kernel $kernel-headers mkinitcpio fastfetch curl wget git xdg-user-dirs artix-archlinux-support --noconfirm --needed
+basestrap -K /mnt base base-devel linux-firmware $kernel $kernel-headers mkinitcpio fastfetch curl wget git xdg-user-dirs artix-archlinux-support --noconfirm --needed
 fatal_error $? "trying to download and install the system. Please check your internet connection"
 
 fstabgen -U /mnt >> /mnt/etc/fstab
