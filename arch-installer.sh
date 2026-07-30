@@ -129,7 +129,7 @@ do
             continue
     fi
 
-    if [ bootmode == "EFI" ]
+    if [[ $bootmode == "EFI" ]]
     then
         echo -e "Format partition? [y/n]"
         read format_efi_selection
