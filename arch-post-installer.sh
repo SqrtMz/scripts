@@ -137,13 +137,10 @@ do
 
     case $tNix in
         [Yy]* ) echo -e "Installing... \n"
-                if (( $? != 0 ))
-                then
-                    curl --proto '=https' --tlsv1.2 -L https://nixos.org/nix/install | sudo sh -s -- --daemon
-                    /nix/var/nix/profiles/default/bin/nix-channel --add https://github.com/nix-community/home-manager/archive/master.tar.gz home-manager
-                    /nix/var/nix/profiles/default/bin/nix-channel --update
-                    /nix/var/nix/profiles/default/bin/nix-shell '<home-manager>' -A install
-                fi
+                curl --proto '=https' --tlsv1.2 -L https://nixos.org/nix/install | sudo sh -s -- --daemon
+                /nix/var/nix/profiles/default/bin/nix-channel --add https://github.com/nix-community/home-manager/archive/master.tar.gz home-manager
+                /nix/var/nix/profiles/default/bin/nix-channel --update
+                /nix/var/nix/profiles/default/bin/nix-shell '<home-manager>' -A install
                 break;;
         
         [Nn]* ) echo "Nix and Home manager won't be installed \n"
