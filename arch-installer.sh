@@ -90,9 +90,9 @@ do
     read root
 
     if [ ! -e $root ]
-        then
-            echo -e "Invalid partition, try again \n"
-            continue
+    then
+        echo -e "Invalid partition, try again \n"
+        continue
     fi
 
     echo -e "Format partition? [y/n]"

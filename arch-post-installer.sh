@@ -5,15 +5,20 @@ sudo timedatectl set-ntp true
 clear
 
 echo "Mz's graphic's installer"
-echo "This script works once connected to internet"
+echo -e "This script works once connected to internet \n"
 
-# Pipewire install
-echo
-echo "Installing Pipewire"
+sudo pacman -S pipewire pipewire-audio gst-plugin-pipewire pipewire-alsa pipewire-jack pipewire-pulse pipewire-roc realtime-privileges xorg dolphin kitty firefox ark ntfs-3g btop nvtop cmake gthumb zsh ncdu sshfs obs-studio arch-install-scripts --noconfirm --needed
 
-sudo pacman -S pipewire pipewire-audio gst-plugin-pipewire pipewire-alsa pipewire-jack pipewire-pulse pipewire-roc realtime-privileges --noconfirm --needed
+paru --version
 
-# Graphic drivers install
+if (( $? != 0 ))
+then
+    git clone https://aur.archlinux.org/paru.git
+    cd paru
+    makepkg -si
+    cd ..
+    rm -rf paru
+fi
 
 while true
 do
@@ -25,7 +30,7 @@ do
 
     case $tAMD in
         [Yy]* ) echo "Installing AMDGPU drivers"
-                sudo pacman -S xf86-video-amdgpu lib32-vulkan-radeon vulkan-tools lib32-libva-mesa-driver mesa-vdpau vdpauinfo clinfo --noconfirm --needed
+                sudo pacman -S xf86-video-amdgpu lib32-vulkan-radeon vulkan-tools lib32-libva-mesa-driver vdpauinfo clinfo --noconfirm --needed
                 break;;
         
         [Nn]* ) echo "AMDGPU drivers won't be installed"
@@ -92,14 +97,22 @@ do
     case $dSel in
         1 ) echo "HyprlandWM Selected"
             desktop="hyprland"
-            sudo pacman -S hyprland brightnessctl pavucontrol waybar rofi-wayland cliphist sddm ranger ttf-nerd-fonts-symbols ttf-font-awesome breeze breeze-gtk gnome-keyring wev nwg-look qt6ct grim slurp xdg-desktop-portal-hyprland archlinux-xdg-menu polkit-gnome hyprpaper network-manager-applet kvantum --noconfirm --needed
-            sudo ln -s /etc/xdg/menus/arch-applications.menu /etc/xdg/menus/applications.menu
+            sudo pacman -S hyprland brightnessctl pavucontrol waybar rofi cliphist ttf-nerd-fonts-symbols  ttf-font-awesome breeze breeze-gtk gnome-keyring wev nwg-look qt6ct grim slurp xdg-desktop-portal-hyprland archlinux-xdg-menu polkit-gnome hyprpaper network-manager-applet kvantum --noconfirm --needed
+
+            if [ ! -e "/etc/xdg/menus/applications.menu" ]
+            then
+                sudo ln -s /etc/xdg/menus/arch-applications.menu /etc/xdg/menus/applications.menu
+            fi
             break;;
         
         2 ) echo "SwayWM Selected"
             desktop="sway"
-            sudo pacman -S sway swaybg brightnessctl pavucontrol waybar rofi-wayland cliphist sddm ranger ttf-nerd-fonts-symbols ttf-font-awesome breeze breeze-gtk gnome-keyring wev nwg-look qt6ct grim slurp xdg-desktop-portal xdg-desktop-portal-wlr archlinux-xdg-menu polkit-gnome network-manager-applet kvantum --noconfirm --needed
-            sudo ln -s /etc/xdg/menus/arch-applications.menu /etc/xdg/menus/applications.menu
+            sudo pacman -S sway swaybg brightnessctl pavucontrol waybar rofi cliphist  ttf-nerd-fonts-symbols ttf-font-awesome breeze breeze-gtk gnome-keyring wev nwg-look qt6ct grim slurp xdg-desktop-portal xdg-desktop-portal-wlr archlinux-xdg-menu polkit-gnome network-manager-applet kvantum --noconfirm --needed
+
+            if [ ! -e "/etc/xdg/menus/applications.menu" ]
+            then
+                sudo ln -s /etc/xdg/menus/arch-applications.menu /etc/xdg/menus/applications.menu
+            fi
             break;;
 
         3 ) echo "KDE Plasma Selected"
@@ -112,24 +125,25 @@ do
     esac
 done
 
-sudo pacman -S xorg dolphin kitty firefox ark okular libreoffice-still ntfs-3g gparted btop nvtop cmake gthumb krita steam mangohud goverlay zsh clonezilla ncdu discord kdeconnect sshfs obs-studio arch-install-scripts --noconfirm --needed
-
 sudo systemctl enable sddm
 
 while true
 do
     echo
-    echo "Install Nix and Home manager? [y/n] \n"
+    echo -e "Install Nix and Home manager? [y/n] \n"
     read tNix
 
     echo
 
     case $tNix in
-        [Yy]* ) echo "Installing... \n"
-                curl --proto '=https' --tlsv1.2 -L https://nixos.org/nix/install | sh -s -- --daemon
-                /nix/var/nix/profiles/default/bin/nix-channel --add https://github.com/nix-community/home-manager/archive/master.tar.gz home-manager
-                /nix/var/nix/profiles/default/bin/nix-channel --update
-                /nix/var/nix/profiles/default/bin/nix-shell '<home-manager>' -A install
+        [Yy]* ) echo -e "Installing... \n"
+                if (( $? != 0 ))
+                then
+                    curl --proto '=https' --tlsv1.2 -L https://nixos.org/nix/install | sudo sh -s -- --daemon
+                    /nix/var/nix/profiles/default/bin/nix-channel --add https://github.com/nix-community/home-manager/archive/master.tar.gz home-manager
+                    /nix/var/nix/profiles/default/bin/nix-channel --update
+                    /nix/var/nix/profiles/default/bin/nix-shell '<home-manager>' -A install
+                fi
                 break;;
         
         [Nn]* ) echo "Nix and Home manager won't be installed \n"
@@ -139,12 +153,6 @@ do
             continue;;
     esac
 done
-
-git clone https://aur.archlinux.org/paru.git
-cd paru
-makepkg -si
-cd ..
-rm -rf paru
 
 echo
 echo "Process Complete"
