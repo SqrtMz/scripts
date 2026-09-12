@@ -141,6 +141,7 @@ do
                 /nix/var/nix/profiles/default/bin/nix-channel --add https://github.com/nix-community/home-manager/archive/master.tar.gz home-manager
                 /nix/var/nix/profiles/default/bin/nix-channel --update
                 /nix/var/nix/profiles/default/bin/nix-shell '<home-manager>' -A install
+                /nix/var/nix/profiles/default/bin/nix flake update
                 break;;
         
         [Nn]* ) echo "Nix and Home manager won't be installed \n"
