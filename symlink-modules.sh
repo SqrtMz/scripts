@@ -8,4 +8,5 @@ ln -sf ${HOME}/mz-dotfiles/modules/kitty 			${HOME}/.config/
 ln -sf ${HOME}/mz-dotfiles/modules/mimeapps.list 	${HOME}/.config/
 ln -sf ${HOME}/mz-dotfiles/modules/nix 				${HOME}/.config/
 ln -sf ${HOME}/mz-dotfiles/modules/nvim 			${HOME}/.config/
+ln -sf ${HOME}/mz-dotfiles/modules/rofi 			${HOME}/.config/
 ln -sf ${HOME}/mz-dotfiles/modules/sway 			${HOME}/.config/
